@@ -1,3 +1,4 @@
+import re
 from os import getenv
 from typing import Any
 from urllib.parse import urlparse
@@ -6,7 +7,12 @@ import discord
 from discord.ext import commands
 from dotenv import load_dotenv
 
-from is_true import reply_dispatch, should_reply
+import reaction
+import util
+from is_true import (
+    contains_truth_question,
+    pick_truth_reply_simple,
+)
 
 
 def assert_str(s: str | None) -> str:
@@ -209,11 +215,40 @@ async def on_ready():
             )
 
 
+def reply_dispatch(text: str) -> str | None:
+    if contains_truth_question(text):
+        return pick_truth_reply_simple()
+
+
+def should_reply(
+    message: discord.Message, user: discord.ClientUser | None
+) -> bool:
+    if user is None:
+        return False
+    else:
+        if message.author == user:
+            return False
+        return user.mentioned_in(message) or bool(
+            re.search(
+                r"@(grok|pebble|pibble)",
+                message.content.lower(),
+                flags=re.IGNORECASE,
+            )
+        )
+
+
 @bot.event
 async def on_message(
     message: discord.Message,
 ):
     user = bot.user
+    # check for reactions
+    reacts = reaction.reacts_with(
+        util.strip_discord_markup(message.content)
+    )
+    if reacts:
+        for r in reacts:
+            _ = await message.add_reaction(r)
     if should_reply(message, user):
         reply = reply_dispatch(message.content)
         if reply:

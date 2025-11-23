@@ -8,6 +8,7 @@
 
 ---
 
+- _Configuration_ should not be in `.env`
 - Is message deferring neccessary?
 - Allow the user who pinned the message to unpin
 - Automatically unpin messages when the original message is deleted
