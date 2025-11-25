@@ -13,6 +13,7 @@ load_dotenv(".env")
 DEBUG = True if (os.getenv("PEBBLE_DEBUG") == "1") else False
 
 import reaction
+import rng
 import util
 from is_true import (
     contains_truth_question,
@@ -220,6 +221,9 @@ async def on_ready():
 
 
 def reply_dispatch(text: str) -> str | None:
+    clean = util.normalize(util.strip_discord_markup(text))
+    if rng.contains_head_and_tails(clean):
+        return rng.head_or_tails()
     if contains_truth_question(text):
         return pick_truth_reply_simple()
 
