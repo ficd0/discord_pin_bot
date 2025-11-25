@@ -1,3 +1,4 @@
+import os
 import re
 from os import getenv
 from typing import Any
@@ -6,6 +7,10 @@ from urllib.parse import urlparse
 import discord
 from discord.ext import commands
 from dotenv import load_dotenv
+
+load_dotenv(".env")
+
+DEBUG = True if (os.getenv("PEBBLE_DEBUG") == "1") else False
 
 import reaction
 import util
@@ -178,7 +183,6 @@ async def pinboard(
 
 
 # - Setup
-load_dotenv(".env")
 
 
 CONFIG: dict[str, Any] = {
