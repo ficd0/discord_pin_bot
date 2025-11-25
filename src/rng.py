@@ -1,11 +1,16 @@
 import random
+import re
+
+_COIN = re.compile(r"\b(heads?|tails?)\b")
 
 
 def contains_head_and_tails(text: str) -> bool:
-    return "head" in text and "tail" in text
+    return bool(_COIN.search(text))
 
 
 def head_or_tails() -> str:
+    if random.random() < 0.001:
+        return "I don't really feel like it right now, sorry"
     return random.choice(("heads", "tails"))
 
 
