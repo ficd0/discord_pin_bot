@@ -22,8 +22,11 @@ RESPONSES = [
 
 KEY_PHRASES = [
     "is this true",
+    "is this right",
     "is that true",
+    "is that right",
     "is it true",
+    "is it right",
     "are you sure",
     "is this correct",
     "is that correct",
@@ -33,16 +36,16 @@ KEY_PHRASES = [
 ]
 
 PATTERNS = [
-    r"\bis (this|that|it) true\b",
+    r"\bis (this|that|it) (true|right)\b",
     r"\bare you sure\b",
-    r"\btrue\??$",
+    r"\b(true|right)\??$",
 ]
 
 _last_replies: deque[str] = deque(maxlen=3)
 
 
-FLEX_PATTERN = re.compile(r"is\s+(?:this|that|it)\s+\w*\s*true")
-ALT_PATTERN = re.compile(r"(?:this|that|it)\s+is\s+true")
+FLEX_PATTERN = re.compile(r"is\s+(?:this|that|it)\s+\w*\s*(true|right)")
+ALT_PATTERN = re.compile(r"(?:this|that|it)\s+is\s+(true|right)")
 
 
 def contains_truth_question(text: str) -> bool:
