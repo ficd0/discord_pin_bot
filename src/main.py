@@ -226,7 +226,7 @@ def reply_dispatch(text: str) -> str | None:
         return rng.head_or_tails()
     if rng.should_rate(clean):
         return rng.get_rating()
-    if contains_truth_question(text):
+    if contains_truth_question(clean):
         return pick_truth_reply_simple()
 
 

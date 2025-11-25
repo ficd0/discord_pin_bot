@@ -2,10 +2,7 @@ import random
 import re
 from collections import deque
 
-from discord import ClientUser, Message
 from rapidfuzz import fuzz
-
-import util
 
 RESPONSES = [
     "Yes",
@@ -49,8 +46,6 @@ ALT_PATTERN = re.compile(r"(?:this|that|it)\s+is\s+(true|right)")
 
 
 def contains_truth_question(text: str) -> bool:
-    text = util.normalize(util.strip_discord_markup(text))
-
     # check direct patterns (strict)
     for p in PATTERNS:
         if re.search(p, text):
