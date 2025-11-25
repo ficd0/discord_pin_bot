@@ -1,11 +1,10 @@
-- coin toss. if message contains “heads” of “tails”, will reply with heads or
-  tails. example usage message: “@Pebble heads is rnote, tails is drawy”
 - @Pebble ping + word “rate” in message → replies with “n/10”, where n is an
   integer 0..=10
+- _Configuration_ should not be in `.env`
+- Allow multiple replies per message as long as patterns match?
 
 ---
 
-- _Configuration_ should not be in `.env`
 - Is message deferring neccessary?
 - Allow the user who pinned the message to unpin
 - Automatically unpin messages when the original message is deleted
@@ -20,3 +19,5 @@
 - `<:ramoke:1310422073562365972>` reaction when message contains `smok`
 - “right?” should work in the “@Pebble is this true?” thingy. say you say
   something, and in the next message go “@Pebble right?” — that should work
+- coin toss. if message contains “heads” of “tails”, will reply with heads or
+  tails. example usage message: “@Pebble heads is rnote, tails is drawy”
