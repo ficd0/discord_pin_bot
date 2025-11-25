@@ -1,4 +1,4 @@
-1. `<:ramoke:1310422073562365972>` reaction when message contains `smok`
+1. `<:ramoke:1310422073562365972>` reaction when message contains `smok` DONE
 2. “right?” should work in the “@Pebble is this true?” thingy. say you say
    something, and in the next message go “@Pebble right?” — that should work
 3. coin toss. if message contains “heads” of “tails”, will reply with heads or
