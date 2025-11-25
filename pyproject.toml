@@ -18,8 +18,8 @@ dependencies = [
 ]
 
 [tool.basedpyright]
-include = ["src"]
-executionEnvironments = [ { root = "src" } ]
+include = ["pebble"]
+executionEnvironments = [ { root = "pebble" } ]
 
 typeCheckingMode = "recommended"
 reportUnusedCallResult = false

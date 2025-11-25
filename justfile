@@ -5,4 +5,4 @@ update:
 
 # runs pebble
 run:
-    uv run src/main.py
+    uv run pebble/main.py
