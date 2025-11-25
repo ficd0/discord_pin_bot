@@ -1,5 +1,3 @@
-- @Pebble ping + word “rate” in message → replies with “n/10”, where n is an
-  integer 0..=10
 - _Configuration_ should not be in `.env`
 - Allow multiple replies per message as long as patterns match?
 
@@ -21,3 +19,5 @@
   something, and in the next message go “@Pebble right?” — that should work
 - coin toss. if message contains “heads” of “tails”, will reply with heads or
   tails. example usage message: “@Pebble heads is rnote, tails is drawy”
+- @Pebble ping + word “rate” in message → replies with “n/10”, where n is an
+  integer 0..=10

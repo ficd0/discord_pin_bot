@@ -224,6 +224,8 @@ def reply_dispatch(text: str) -> str | None:
     clean = util.normalize(util.strip_discord_markup(text))
     if rng.contains_head_and_tails(clean):
         return rng.head_or_tails()
+    if rng.should_rate(clean):
+        return rng.get_rating()
     if contains_truth_question(text):
         return pick_truth_reply_simple()
 
