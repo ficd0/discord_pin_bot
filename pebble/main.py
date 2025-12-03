@@ -16,189 +16,174 @@ import reaction
 import rng
 import util
 from is_true import (
-    contains_truth_question,
-    pick_truth_reply_simple,
+	contains_truth_question,
+	pick_truth_reply_simple,
 )
 
 
 def assert_str(s: str | None) -> str:
-    assert isinstance(s, str)
-    return s
+	assert isinstance(s, str)
+	return s
 
 
 async def channel_by_name(guild: discord.Guild, name: str):
-    return discord.utils.get(guild.text_channels, name=name)
+	return discord.utils.get(guild.text_channels, name=name)
 
 
 async def get_embed(message: discord.Message):
-    embed = discord.Embed(
-        description=message.content,
-        color=0x2B2D31,
-        url=message.jump_url,  # Used to quickly find duplicate pins
-    )
-    embed.add_field(name="", value="", inline=False)  # Spacer
+	embed = discord.Embed(
+		description=message.content,
+		color=0x2B2D31,
+		url=message.jump_url,  # Used to quickly find duplicate pins
+	)
+	embed.add_field(name="", value="", inline=False)  # Spacer
 
-    if message.embeds:
-        data = message.embeds[0]
-        if data.type == "image":
-            embed.set_image(url=data.url)
+	if message.embeds:
+		data = message.embeds[0]
+		if data.type == "image":
+			embed.set_image(url=data.url)
 
-    if message.attachments:
-        attachment = message.attachments[0]
-        path = urlparse(attachment.url).path
-        if path.lower().endswith(("png", "jpeg", "jpg", "gif", "webp")):
-            embed.set_image(url=attachment.url)
-        else:
-            embed.add_field(
-                name="Attachment",
-                value=f"-# {attachment.url}",
-                inline=False,
-            )
+	if message.attachments:
+		attachment = message.attachments[0]
+		path = urlparse(attachment.url).path
+		if path.lower().endswith(("png", "jpeg", "jpg", "gif", "webp")):
+			embed.set_image(url=attachment.url)
+		else:
+			embed.add_field(
+				name="Attachment",
+				value=f"-# {attachment.url}",
+				inline=False,
+			)
 
-    embed.add_field(name="User", value=f"-# {message.author.mention}")
-    embed.add_field(name="Link", value=f"-# {message.jump_url}")
-    embed.set_author(
-        name=message.author.display_name,
-        icon_url=message.author.display_avatar.url,
-    )
+	embed.add_field(name="User", value=f"-# {message.author.mention}")
+	embed.add_field(name="Link", value=f"-# {message.jump_url}")
+	embed.set_author(
+		name=message.author.display_name,
+		icon_url=message.author.display_avatar.url,
+	)
 
-    return embed
+	return embed
 
 
 async def mod_log(guild: discord.Guild, message: str):
-    mod_log_channel = await channel_by_name(
-        guild, CONFIG["mod_log_channel"]
-    )
-    if not mod_log_channel:
-        print(
-            f"WARNING: Mod log channel not found (looking for #{CONFIG['mod_log_channel']})"
-        )
-        return
-    if not mod_log_channel.permissions_for(guild.me).view_channel:
-        print(
-            f"WARNING: Missing permissions to view #{CONFIG['mod_log_channel']}"
-        )
-        return
-    if not mod_log_channel.permissions_for(guild.me).send_messages:
-        print(
-            f"WARNING: Missing permissions to send messages in #{CONFIG['mod_log_channel']}"
-        )
-        return
-    await mod_log_channel.send(
-        message, allowed_mentions=discord.AllowedMentions(users=False)
-    )
+	mod_log_channel = await channel_by_name(guild, CONFIG["mod_log_channel"])
+	if not mod_log_channel:
+		print(
+			f"WARNING: Mod log channel not found (looking for #{CONFIG['mod_log_channel']})"
+		)
+		return
+	if not mod_log_channel.permissions_for(guild.me).view_channel:
+		print(f"WARNING: Missing permissions to view #{CONFIG['mod_log_channel']}")
+		return
+	if not mod_log_channel.permissions_for(guild.me).send_messages:
+		print(
+			f"WARNING: Missing permissions to send messages in #{CONFIG['mod_log_channel']}"
+		)
+		return
+	await mod_log_channel.send(
+		message, allowed_mentions=discord.AllowedMentions(users=False)
+	)
 
 
 async def build_log(
-    initiator: discord.User,
-    action: str,
-    target: discord.User,
-    reason: str | None = None,
-    extra: str | None = None,
+	initiator: discord.User,
+	action: str,
+	target: discord.User,
+	reason: str | None = None,
+	extra: str | None = None,
 ):
-    reason = f" with reason `{reason}`" if reason else ""
-    extra = f" {extra}" if extra else ""
-    return f"{initiator.mention} (`{initiator.name}`) {action} {target.mention} (`{target.name}`){extra}{reason}"
+	reason = f" with reason `{reason}`" if reason else ""
+	extra = f" {extra}" if extra else ""
+	return f"{initiator.mention} (`{initiator.name}`) {action} {target.mention} (`{target.name}`){extra}{reason}"
 
 
 async def perm_error(interaction: discord.Interaction, message: str):
-    await interaction.edit_original_response(
-        content=f"{CONFIG['permission_error_message']} {message}"
-    )
+	await interaction.edit_original_response(
+		content=f"{CONFIG['permission_error_message']} {message}"
+	)
 
 
-async def pinboard(
-    interaction: discord.Interaction, message: discord.Message
-):
-    await interaction.response.defer()
+async def pinboard(interaction: discord.Interaction, message: discord.Message):
+	await interaction.response.defer()
 
-    should_be_nsfw = (
-        message.channel.is_nsfw()
-        or message.channel.name in CONFIG["nsfw_channels"]
-    )
-    if should_be_nsfw:
-        channel_to_get = CONFIG["nsfw_pins_channel"]
-    else:
-        channel_to_get = CONFIG["pins_channel"]
+	should_be_nsfw = (
+		message.channel.is_nsfw() or message.channel.name in CONFIG["nsfw_channels"]
+	)
+	if should_be_nsfw:
+		channel_to_get = CONFIG["nsfw_pins_channel"]
+	else:
+		channel_to_get = CONFIG["pins_channel"]
 
-    pin_channel = await channel_by_name(message.guild, channel_to_get)
+	pin_channel = await channel_by_name(message.guild, channel_to_get)
 
-    if not pin_channel:
-        await interaction.edit_original_response(
-            content=f"Pinboard channel not found (looking for `#{channel_to_get}`)"
-        )
-        return
-    if not pin_channel.permissions_for(message.guild.me).view_channel:
-        await perm_error(interaction, f"view {pin_channel.mention}")
-        return
-    if not pin_channel.permissions_for(message.guild.me).send_messages:
-        await perm_error(
-            interaction, f"send messages in {pin_channel.mention}"
-        )
-        return
-    if not pin_channel.permissions_for(message.guild.me).embed_links:
-        await perm_error(
-            interaction, f"embed links in {pin_channel.mention}"
-        )
-        return
-    if CONFIG["nsfw_pin_channel_check_enabled"] and (
-        should_be_nsfw and not pin_channel.is_nsfw()
-    ):
-        await interaction.edit_original_response(
-            content=f"{pin_channel.mention} must be marked as NSFW"
-        )
-        return
+	if not pin_channel:
+		await interaction.edit_original_response(
+			content=f"Pinboard channel not found (looking for `#{channel_to_get}`)"
+		)
+		return
+	if not pin_channel.permissions_for(message.guild.me).view_channel:
+		await perm_error(interaction, f"view {pin_channel.mention}")
+		return
+	if not pin_channel.permissions_for(message.guild.me).send_messages:
+		await perm_error(interaction, f"send messages in {pin_channel.mention}")
+		return
+	if not pin_channel.permissions_for(message.guild.me).embed_links:
+		await perm_error(interaction, f"embed links in {pin_channel.mention}")
+		return
+	if CONFIG["nsfw_pin_channel_check_enabled"] and (
+		should_be_nsfw and not pin_channel.is_nsfw()
+	):
+		await interaction.edit_original_response(
+			content=f"{pin_channel.mention} must be marked as NSFW"
+		)
+		return
 
-    # Check if message is already pinned
-    if CONFIG["duplicate_pins_check_count"] > 0:
-        if not pin_channel.permissions_for(
-            message.guild.me
-        ).read_message_history:
-            await perm_error(
-                interaction,
-                f"read message history in {pin_channel.mention}",
-            )
-            return
+	# Check if message is already pinned
+	if CONFIG["duplicate_pins_check_count"] > 0:
+		if not pin_channel.permissions_for(message.guild.me).read_message_history:
+			await perm_error(
+				interaction,
+				f"read message history in {pin_channel.mention}",
+			)
+			return
 
-        async for pin_message in pin_channel.history(
-            limit=CONFIG["duplicate_pins_check_count"]
-        ):
-            current = (
-                pin_message.embeds
-                and pin_message.embeds[0]
-                and pin_message.embeds[0].url
-                or None
-            )
-            if current == message.jump_url:
-                await interaction.edit_original_response(
-                    content=f"Message is already pinned at {pin_message.jump_url}"
-                )
-                return
+		async for pin_message in pin_channel.history(
+			limit=CONFIG["duplicate_pins_check_count"]
+		):
+			current = (
+				pin_message.embeds
+				and pin_message.embeds[0]
+				and pin_message.embeds[0].url
+				or None
+			)
+			if current == message.jump_url:
+				await interaction.edit_original_response(
+					content=f"Message is already pinned at {pin_message.jump_url}"
+				)
+				return
 
-    embed = await get_embed(message)
-    await pin_channel.send(embed=embed)
+	embed = await get_embed(message)
+	await pin_channel.send(embed=embed)
 
-    await interaction.edit_original_response(
-        content=f"Message pinned to {pin_channel.mention}"
-    )
+	await interaction.edit_original_response(
+		content=f"Message pinned to {pin_channel.mention}"
+	)
 
 
 # - Setup
 
 
 CONFIG: dict[str, Any] = {
-    "mod_log_channel": getenv("MOD_LOG_CHANNEL"),
-    "pins_channel": getenv("PINS_CHANNEL"),
-    "nsfw_pins_channel": getenv("NSFW_PINS_CHANNEL"),
-    "permission_error_message": getenv("PERMISSION_ERROR_MESSAGE"),
-    "duplicate_pins_check_count": int(
-        assert_str(getenv("DUPLICATE_PINS_CHECK_COUNT"))
-    ),
-    "nsfw_channels": assert_str(getenv("NSFW_CHANNELS")).split(","),
-    "nsfw_pin_channel_check_enabled": assert_str(
-        getenv("NSFW_PIN_CHANNEL_CHECK_ENABLED")
-    ).lower()
-    == "true",
+	"mod_log_channel": getenv("MOD_LOG_CHANNEL"),
+	"pins_channel": getenv("PINS_CHANNEL"),
+	"nsfw_pins_channel": getenv("NSFW_PINS_CHANNEL"),
+	"permission_error_message": getenv("PERMISSION_ERROR_MESSAGE"),
+	"duplicate_pins_check_count": int(assert_str(getenv("DUPLICATE_PINS_CHECK_COUNT"))),
+	"nsfw_channels": assert_str(getenv("NSFW_CHANNELS")).split(","),
+	"nsfw_pin_channel_check_enabled": assert_str(
+		getenv("NSFW_PIN_CHANNEL_CHECK_ENABLED")
+	).lower()
+	== "true",
 }
 
 intents = discord.Intents.default()
@@ -211,113 +196,107 @@ bot = commands.Bot(command_prefix="", intents=intents)
 # - Main
 @bot.event
 async def on_ready():
-    print(f"Connected => {bot.user}")
+	print(f"Connected => {bot.user}")
 
-    for guild in bot.guilds:
-        if not guild.me.guild_permissions.view_audit_log:
-            print(
-                f"WARNING: Missing permissions to view audit log in {guild.name}"
-            )
+	for guild in bot.guilds:
+		if not guild.me.guild_permissions.view_audit_log:
+			print(f"WARNING: Missing permissions to view audit log in {guild.name}")
 
 
 def reply_dispatch(text: str) -> str | None:
-    clean = util.normalize(util.strip_discord_markup(text))
-    if rng.contains_head_and_tails(clean):
-        return rng.head_or_tails()
-    if rng.should_rate(clean):
-        return rng.get_rating()
-    if contains_truth_question(clean):
-        return pick_truth_reply_simple()
+	clean = util.normalize(util.strip_discord_markup(text))
+	if rng.contains_head_and_tails(clean):
+		return rng.head_or_tails()
+	if rng.should_rate(clean):
+		return rng.get_rating()
+	if contains_truth_question(clean):
+		return pick_truth_reply_simple()
 
 
-def should_reply(
-    message: discord.Message, user: discord.ClientUser | None
-) -> bool:
-    if user is None:
-        return False
-    else:
-        if message.author == user:
-            return False
-        return user.mentioned_in(message) or bool(
-            re.search(
-                r"@(grok|pebble|pibble)",
-                message.content.lower(),
-                flags=re.IGNORECASE,
-            )
-        )
+def should_reply(message: discord.Message, user: discord.ClientUser | None) -> bool:
+	if user is None:
+		return False
+	else:
+		if message.author == user:
+			return False
+		return user.mentioned_in(message) or bool(
+			re.search(
+				r"@(grok|pebble|pibble|chat)",
+				message.content.lower(),
+				flags=re.IGNORECASE,
+			)
+		)
 
 
 @bot.event
 async def on_message(
-    message: discord.Message,
+	message: discord.Message,
 ):
-    user = bot.user
-    # check for reactions
-    reacts = reaction.reacts_with(
-        util.strip_discord_markup(message.content)
-    )
-    if reacts:
-        for r in reacts:
-            _ = await message.add_reaction(r)
-    if should_reply(message, user):
-        reply = reply_dispatch(message.content)
-        if reply:
-            _ = await message.reply(reply)
+	user = bot.user
+	# check for reactions
+	reacts = reaction.reacts_with(util.strip_discord_markup(message.content))
+	if reacts:
+		for r in reacts:
+			_ = await message.add_reaction(r)
+	if should_reply(message, user):
+		reply = reply_dispatch(message.content)
+		if reply:
+			_ = await message.reply(reply)
 
 
 @bot.event
 async def on_audit_log_entry_create(entry: discord.AuditLogEntry):
-    message = {
-        "initiator": None,
-        "action": None,
-        "target": None,
-        "reason": entry.reason or None,
-        "extra": None,
-    }
+	message = {
+		"initiator": None,
+		"action": None,
+		"target": None,
+		"reason": entry.reason or None,
+		"extra": None,
+	}
 
-    if (
-        entry.action == discord.AuditLogAction.member_update
-        and entry.changes.after.timed_out_until
-    ):
-        until = int(entry.changes.after.timed_out_until.timestamp())
-        message["extra"] = f"until <t:{until}:f>"
-        message["action"] = "timed out"
-    elif entry.action == discord.AuditLogAction.ban:
-        message["action"] = "banned"
-    elif entry.action == discord.AuditLogAction.kick:
-        message["action"] = "kicked"
-    else:
-        return
+	if (
+		entry.action == discord.AuditLogAction.member_update
+		and entry.changes.after.timed_out_until
+	):
+		until = int(entry.changes.after.timed_out_until.timestamp())
+		message["extra"] = f"until <t:{until}:f>"
+		message["action"] = "timed out"
+	elif entry.action == discord.AuditLogAction.ban:
+		message["action"] = "banned"
+	elif entry.action == discord.AuditLogAction.kick:
+		message["action"] = "kicked"
+	else:
+		return
 
-    message["initiator"] = await bot.fetch_user(entry.user_id)
-    message["target"] = await bot.fetch_user(entry.target.id)
-    message = await build_log(**message)
-    await mod_log(entry.guild, message)
+	message["initiator"] = await bot.fetch_user(entry.user_id)
+	message["target"] = await bot.fetch_user(entry.target.id)
+	message = await build_log(**message)
+	await mod_log(entry.guild, message)
 
 
 @bot.tree.command(name="sync")
 async def sync(interaction: discord.Interaction):
-    await interaction.response.defer(ephemeral=True)
-    if not interaction.user.guild_permissions.administrator:
-        await interaction.edit_original_response(
-            content="You must be an administrator to use this command"
-        )
-        return
-    await bot.tree.sync()
-    await interaction.edit_original_response(content="Commands synced")
+	await interaction.response.defer(ephemeral=True)
+	if not interaction.user.guild_permissions.administrator:
+		await interaction.edit_original_response(
+			content="You must be an administrator to use this command"
+		)
+		return
+	await bot.tree.sync()
+	await interaction.edit_original_response(content="Commands synced")
 
 
 @bot.tree.context_menu(name="Pin Message")
 async def channel_pin_message_context(
-    interaction: discord.Interaction, message: discord.Message
+	interaction: discord.Interaction, message: discord.Message
 ):
-    await pinboard(interaction, message)
+	await pinboard(interaction, message)
 
 
 # - Start
 def main():
-    bot.run(assert_str(getenv("TOKEN")))
+	bot.run(assert_str(getenv("TOKEN")))
 
 
 if __name__ == "__main__":
-    main()
+	main()
